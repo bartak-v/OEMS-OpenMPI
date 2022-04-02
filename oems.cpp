@@ -1,3 +1,9 @@
+/* 
+    Project: Odd Even Merge Sort using OpenMPI (PRL)
+    Author:  Vít Barták
+    Date:    02.04.2022
+*/
+
 #include <iostream>
 #include <stdio.h>
 #include <mpi.h>
@@ -30,15 +36,25 @@ void readNumbersFile()
     cout << endl;
 }
 
+struct node {
+  int rank;
+  int size;
+  int in1;
+  int in2;
+  int H;
+  int L;
+};
+
 int main(int argc, char *argv[])
 {
-    int rank, size;
+    //int rank, size;
+    node n;
     MPI_Init(&argc, &argv);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &n.rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &n.size);
 
     // If processors rank is master process, read the numbers file
-    if (rank == 0)
+    if (n.rank == 0)
         readNumbersFile();
 
     MPI_Finalize();
