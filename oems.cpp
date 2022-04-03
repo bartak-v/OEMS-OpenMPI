@@ -50,10 +50,7 @@ int main(int argc, char *argv[])
 {
     int rank;
     int size;
-    int x;
-    int y;
-    int L; // Lower output of the comparator
-    int H; // Higher output of the comparator
+    int x,y,L,H=0;//[x,y] inputs to the node | [L]ower output of the comparator | [H]igher output of the comparator
 
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
