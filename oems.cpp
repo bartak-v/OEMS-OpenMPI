@@ -40,17 +40,26 @@ void readNumbersFile()
     }
     cout << endl;
 }
-
-void compare_and_output()
+int x,y,L,H=0;
+void compare_and_save()
 {
-
+    if(x < y){
+        H = y;
+        L = x;
+    }else if (x==y){
+        H=x;
+        L=x;
+    }else{
+        H=x;
+        L=y;
+    }
 }
 
 int main(int argc, char *argv[])
 {
     int rank;
     int size;
-    int x,y,L,H=0;//[x,y] inputs to the node | [L]ower output of the comparator | [H]igher output of the comparator
+    //[x,y] inputs to the node | [L]ower output of the comparator | [H]igher output of the comparator
 
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -85,21 +94,27 @@ int main(int argc, char *argv[])
     }
     MPI_Barrier(MPI_COMM_WORLD);
 
+    // 4 1x1 sítě
     if (rank < 4)
     {
-        // MPI_Request request;
+        // Input
         MPI_Irecv(&x, 1, MPI_INT, MASTER, TAG_X, MPI_COMM_WORLD, &request);
         MPI_Irecv(&y, 1, MPI_INT, MASTER, TAG_Y, MPI_COMM_WORLD, &request);
-        printf("Received from source %d / data %d %d I am %d\n", MASTER, x, y, rank);
-        compare_and_output();
+        compare_and_save();
+        printf("I am %d X %d   Y %d  H %d L %d \n", rank, x, y, H, L);
+
+        //Send it to the two 2x2 networks | output L H
+        MPI_Isend(&a, 1, MPI_INT, receiver, TAG_X, MPI_COMM_WORLD, &request);
+        MPI_Isend(&b, 1, MPI_INT, receiver, TAG_Y, MPI_COMM_WORLD, &request);
     }
 
-    // Udělat síť 4x 1x1
+    
 
     // Udělat 2x síť 2x2
 
-    // Udělat 4x4 síŤ
-    // cout << rank << "My numbers are " << inputs[0] << " " << inputs[1] << endl;
+    // Udělat 4x4 síť
+
+
     MPI_Finalize();
     return EXIT_SUCCESS;
 }
