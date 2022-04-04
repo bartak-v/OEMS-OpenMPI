@@ -224,7 +224,6 @@ int main(int argc, char *argv[])
     // Gathering + printing sorted numbers 
     if(rank==0) receive_input_master(request);
 
-
     MPI_Finalize();
     return EXIT_SUCCESS;
 }
