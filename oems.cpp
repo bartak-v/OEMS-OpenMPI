@@ -324,7 +324,7 @@ int main(int argc, char *argv[])
     }
     MPI_Barrier(MPI_COMM_WORLD);
     MPI_Ibarrier(MPI_COMM_WORLD, &request);
-    MPI_Wait(&request, &status);
+    MPI_Wait(&request, &status); // Wait for everything to end
 
     // Gathering + printing sorted numbers
     if (rank == 0)
