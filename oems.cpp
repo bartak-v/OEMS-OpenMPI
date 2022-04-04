@@ -20,7 +20,7 @@ using namespace std;
 
 vector<int> in_numbers;
 vector<int> sorted_numbers;
-int x,y,L,H=0;
+int one,x,y,L,H=0;
 
 void readNumbersFile()
 {
@@ -55,12 +55,16 @@ void compare_and_save(int rank)
         H=x;
         L=y;
     }
-    printf("I am %d X %d   Y %d  H %d L %d \n", rank, x, y, H, L);
+    //printf("I am %d X %d   Y %d  H %d L %d \n", rank, x, y, H, L);
 }
 
 
-void send_output_to_master(int a,int tag,MPI_Request req){
-    MPI_Isend(&a, 1, MPI_INT, MASTER, tag, MPI_COMM_WORLD, &req);
+void send_output_to_master(int a,int tag, MPI_Request req){
+    MPI_Isend(&a, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &req);
+}
+
+void receive_one_input(int src,int tag, MPI_Request req){
+    MPI_Irecv(&one, 1, MPI_INT, src, tag, MPI_COMM_WORLD, &req);
 }
 
 // Send two outputs of the comparator a,b, to receiverL and receiverH with custom tags tag1 and tag2 (they can equal)
@@ -75,6 +79,22 @@ void receive_input(int src1,int src2,int tag1,int tag2,MPI_Request req){
     MPI_Irecv(&y, 1, MPI_INT, src2, tag2, MPI_COMM_WORLD, &req);
 }
 
+
+void receive_input_master(MPI_Request req){
+    receive_one_input(10,0,req);
+    sorted_numbers.push_back(one);
+    for(int i = 0; i < 3; i++){
+        receive_input(16+i,16+i,16+i,16+i+5,req);
+        sorted_numbers.push_back(x);
+        sorted_numbers.push_back(y);
+    }
+    receive_one_input(13,0,req);
+    sorted_numbers.push_back(one);
+
+    for(int number:sorted_numbers){
+        cout << number << endl;
+    }
+}
 
 int main(int argc, char *argv[])
 {
@@ -198,15 +218,13 @@ int main(int argc, char *argv[])
         send_output(L,H,0,0,rank,rank+5,request); //Send it to 0
     }
     MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Ibarrier(MPI_COMM_WORLD,&request);
+    MPI_Wait(&request,&status);
 
     // Gathering + printing sorted numbers 
-    if(rank==0) receive_input_master();
+    if(rank==0) receive_input_master(request);
 
 
     MPI_Finalize();
     return EXIT_SUCCESS;
-}
-
-void receive_input_master(){
-    
 }
