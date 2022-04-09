@@ -43,6 +43,7 @@ void readNumbersFile()
     cout << endl;
 }
 
+// Compare the inputs and save them into outputs
 void compare_and_save(int rank)
 {
     if (x < y)
@@ -60,14 +61,15 @@ void compare_and_save(int rank)
         H = x;
         L = y;
     }
-    // printf("I am %d X %d   Y %d  H %d L %d \n", rank, x, y, H, L);
 }
 
+// Send comparators output to the master node
 void send_output_to_master(int a, int tag, MPI_Request req)
 {
     MPI_Isend(&a, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &req);
 }
 
+// Receive one input from specified sender
 void receive_one_input(int src, int tag, MPI_Request req)
 {
     MPI_Irecv(&one, 1, MPI_INT, src, tag, MPI_COMM_WORLD, &req);
@@ -87,6 +89,7 @@ void receive_input(int src1, int src2, int tag1, int tag2, MPI_Request req)
     MPI_Irecv(&y, 1, MPI_INT, src2, tag2, MPI_COMM_WORLD, &req);
 }
 
+// Receive the final sorted "array" of numbers
 void receive_input_master(MPI_Request req)
 {
     receive_one_input(10, 0, req);
@@ -123,6 +126,7 @@ int main(int argc, char *argv[])
         readNumbersFile(); // Reading the files from the numbers file into a vector
     }
     MPI_Barrier(MPI_COMM_WORLD);
+    double start = MPI_Wtime(); // Measure runtime
 
     if (rank == 0)
     {
@@ -325,10 +329,13 @@ int main(int argc, char *argv[])
     MPI_Barrier(MPI_COMM_WORLD);
     MPI_Ibarrier(MPI_COMM_WORLD, &request);
     MPI_Wait(&request, &status); // Wait for everything to end
+    double end = MPI_Wtime();
 
     // Gathering + printing sorted numbers
-    if (rank == 0)
+    if (rank == 0){
         receive_input_master(request);
+        //cout << end-start << endl;
+    }
 
     MPI_Finalize();
     return EXIT_SUCCESS;
